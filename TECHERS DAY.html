@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senior High School Greetings</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navyDark: '#0f172a',
+                        cardBg: '#1e293b',
+                        cardBackBg: '#0f172a',
+                        gold: {
+                            300: '#fde047',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        purpleAcc: {
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* 3D Flip Card Architecture */
+        .card-perspective {
+            perspective: 1200px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+            border-radius: 1.25rem;
+            overflow: hidden;
+        }
+
+        .card-front {
+            z-index: 2;
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            z-index: 1;
+            transform: rotateY(180deg);
+        }
+
+        /* High-contrast dark glassmorphism card styling */
+        .glass-card-front {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(245, 158, 11, 0.08);
+        }
+
+        .glass-card-front:hover {
+            border-color: rgba(245, 158, 11, 0.5);
+            box-shadow: 0 15px 30px -5px rgba(168, 85, 247, 0.25), 0 0 20px 0 rgba(245, 158, 11, 0.2);
+        }
+
+        .glass-card-back {
+            background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 60%, #030712 100%);
+            border: 1.5px solid rgba(245, 158, 11, 0.45);
+            box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-slate-950 relative">
+
+    <canvas id="starCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
+
+    <!-- Floating Watermark (Bottom Right) -->
+    <div class="fixed bottom-4 right-4 z-50 pointer-events-none select-none">
+        <div class="flex items-center gap-1.5 bg-slate-900/80 border border-gold-500/30 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg opacity-60 hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-code text-[10px] text-gold-400"></i>
+            <span class="text-[11px] font-semibold text-slate-300 tracking-wide">Developed by Vin</span>
+        </div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 glass-nav shadow-lg shadow-black/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-gold-500 via-amber-400 to-purpleAcc-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-gold-500/20">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-lg sm:text-2xl text-white tracking-tight leading-none block">Senior High School Greetings</span>
+                    <span class="text-[11px] sm:text-xs font-semibold text-gold-400 tracking-wider uppercase">Celebrating our wonderful Teachers</span>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-3 z-10">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-gold-400 border border-slate-700 transition duration-200 flex items-center gap-2 text-xs font-semibold" title="Toggle Sound Effects">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-sm"></i>
+                    <span class="hidden md:inline" id="soundText">Sound: On</span>
+                </button>
+                <button onclick="triggerConfetti()" class="bg-gradient-to-r from-gold-500 via-amber-500 to-purpleAcc-500 hover:from-gold-400 hover:to-purpleAcc-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-gold-500/20 transition duration-200 flex items-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Celebrate 🎉</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        
+        <!-- Hero Title Section -->
+        <section class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <div class="inline-flex items-center gap-2 bg-slate-900/90 border border-gold-500/40 text-gold-400 text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full mb-6 shadow-xl backdrop-blur-md">
+                <i class="fa-solid fa-star text-gold-400 text-xs"></i>
+                <span>Teacher's Day Special Edition</span>
+                <i class="fa-solid fa-star text-gold-400 text-xs"></i>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-extrabold text-white tracking-tight leading-tight mb-4">
+                Senior High School <br class="hidden sm:inline"/>
+                <span class="bg-gradient-to-r from-gold-300 via-gold-400 to-purpleAcc-400 bg-clip-text text-transparent">Greetings & Tributes</span>
+            </h1>
+
+            <p class="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-normal max-w-2xl mx-auto">
+                Celebrating our wonderful Teachers. Click or tap any card to flip it over and read a special thank you greeting dedicated to each teacher!
+            </p>
+        </section>
+
+        <!-- Search & Category Filters Toolbar -->
+        <section class="mb-10 max-w-5xl mx-auto">
+            <div class="bg-slate-900/90 border border-slate-800 p-4 sm:p-5 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Search Input Bar -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search Teacher by Name..." class="w-full bg-slate-950 text-white placeholder-slate-400 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-gold-400 transition">
+                </div>
+
+                <!-- Gender Category Filters -->
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center">
+                    <button id="filter-all" onclick="setCategoryFilter('all')" class="filter-btn bg-gold-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition shadow-md">
+                        All Teachers (12)
+                    </button>
+                    <button id="filter-sir" onclick="setCategoryFilter('sir')" class="filter-btn bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3.5 py-2 rounded-xl text-xs sm:text-sm border border-slate-700 transition">
+                        Sirs (3)
+                    </button>
+                    <button id="filter-maam" onclick="setCategoryFilter('maam')" class="filter-btn bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3.5 py-2 rounded-xl text-xs sm:text-sm border border-slate-700 transition">
+                        Ma'ams (9)
+                    </button>
+                </div>
+
+                <!-- Global Card Flip / Reset Actions -->
+                <div class="flex items-center justify-end gap-2.5 w-full md:w-auto">
+                    <button onclick="flipAllCards()" class="w-1/2 md:w-auto bg-slate-800 hover:bg-slate-700 text-gold-400 border border-gold-500/30 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Flip All
+                    </button>
+                    <button onclick="resetAllCards()" class="w-1/2 md:w-auto bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="teachersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Dynamic Teacher Cards dynamically injected by JavaScript -->
+        </section>
+
+        <!-- Search fallback state -->
+        <div id="noResults" class="hidden text-center py-16">
+            <div class="w-16 h-16 rounded-full bg-slate-800 text-gold-400 flex items-center justify-center text-2xl mx-auto mb-4 border border-slate-700">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">No Teacher Found</h3>
+            <p class="text-sm text-slate-400">Try searching for another teacher's name.</p>
+        </div>
+
+    </main>
+
+    <footer class="relative z-10 border-t border-slate-800/80 py-8 bg-slate-950/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fa-solid fa-graduation-cap text-gold-400 text-base"></i>
+                <span class="font-serif font-bold text-white text-sm">Senior High School Greetings</span>
+            </div>
+            <p class="text-xs text-slate-400">
+                Dedicated with honor & gratitude to all Senior High School Teachers. Happy Teacher's Day!
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 1. ALL 12 SENIOR HIGH SCHOOL TEACHERS AND MESSAGES
+        const teachersData = [
+            { id: 1, name: "Sir Roman", category: "sir", icon: "fa-ribbon", message: "Thank you for your guidance, unwavering support, and patience in shaping our minds for the future. Your wisdom inspires us every day!" },
+            { id: 2, name: "Sir Joemar", category: "sir", icon: "fa-star", message: "Thank you for bringing passion and dedication to every lesson. Your encouragement helps us aim higher and reach our full potential!" },
+            { id: 3, name: "Ma'am Lesly", category: "maam", icon: "fa-sun", message: "Thank you for your warmth, grace, and continuous encouragement. You make learning an inspiring and joyful experience!" },
+            { id: 4, name: "Ma'am Krista", category: "maam", icon: "fa-wand-magic-sparkles", message: "Thank you for always believing in us and motivating us to excel. Your kindness and enthusiasm leave a lasting impact on all of us!" },
+            { id: 5, name: "Ma'am Jalline", category: "maam", icon: "fa-compass", message: "Thank you for your tireless dedication and bright energy. You inspire us to stay curious, work hard, and never stop growing!" },
+            { id: 6, name: "Ma'am Jhaleel Anne", category: "maam", icon: "fa-award", message: "Thank you for your patience, guidance, and endless positivity. You light up the classroom and make every challenge feel achievable!" },
+            { id: 7, name: "Ma'am Angelica", category: "maam", icon: "fa-face-smile", message: "Thank you for your gentle guidance, kindness, and deep understanding. You inspire us to do our best in everything we undertake!" },
+            { id: 8, name: "Ma'am Eunice", category: "maam", icon: "fa-gem", message: "Thank you for your cheerful smile, unwavering dedication, and inspiring lessons. You truly bring out the best in every student!" },
+            { id: 9, name: "Ma'am Charizel", category: "maam", icon: "fa-certificate", message: "Thank you for your passion for teaching and your genuine care for our success. Your support makes a world of difference!" },
+            { id: 10, name: "Ma'am Jhean", category: "maam", icon: "fa-shield-halved", message: "Thank you for your constant motivation, understanding, and positive energy. You teach us not just lessons, but valuable life skills!" },
+            { id: 11, name: "Ma'am Janine", category: "maam", icon: "fa-lightbulb", message: "Thank you for your endless patience, creative teaching, and uplifting words. You make every day in Senior High School memorable!" },
+            { id: 12, name: "Sir Romy", category: "sir", icon: "fa-crown", message: "Thank you for your steadfast support, great leadership, and inspiring guidance. You motivate us to strive for excellence every day!" }
+        ];
+
+        // Custom SVG Vector Avatars (Illustrated Character Logos)
+        function getMaleAvatarSvg() {
+            return `
+                <svg class="w-full h-full p-2" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="url(#maleGrad)" />
+                    <path d="M30 40C30 25 38 18 50 18C62 18 70 25 70 40C70 28 60 22 50 22C40 22 30 28 30 40Z" fill="#1e293b"/>
+                    <path d="M32 32C35 24 43 20 52 21C62 22 68 28 68 34C68 34 60 25 50 25C40 25 34 31 32 32Z" fill="#f59e0b"/>
+                    <circle cx="50" cy="45" r="18" fill="#fed7aa"/>
+                    <rect x="46" y="58" width="8" height="10" fill="#fdba74"/>
+                    <path d="M25 85C25 72 35 65 50 65C65 65 75 72 75 85V98H25V85Z" fill="#1e1b4b"/>
+                    <path d="M42 65L50 78L58 65L50 82L42 65Z" fill="#f8fafc"/>
+                    <path d="M48 68L50 80L52 68Z" fill="#c084fc"/>
+                    <defs>
+                        <linearGradient id="maleGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#3b82f6" stop-opacity="0.3"/>
+                            <stop offset="1" stop-color="#1e1b4b" stop-opacity="0.8"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            `;
+        }
+
+        function getFemaleAvatarSvg() {
+            return `
+                <svg class="w-full h-full p-2" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="url(#femaleGrad)" />
+                    <path d="M26 40C26 22 36 15 50 15C64 15 74 22 74 40C74 58 68 68 65 72H35C32 68 26 58 26 40Z" fill="#312e81"/>
+                    <circle cx="50" cy="44" r="17" fill="#fed7aa"/>
+                    <path d="M30 35C33 24 41 18 50 18C59 18 67 24 70 35C65 26 58 22 50 22C42 22 35 26 30 35Z" fill="#a855f7"/>
+                    <path d="M33 35C33 45 36 55 38 60C36 52 35 42 35 36" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M67 35C67 45 64 55 62 60C64 52 65 42 65 36" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+                    <rect x="46" y="57" width="8" height="9" fill="#fdba74"/>
+                    <path d="M24 85C24 71 34 64 50 64C66 64 76 71 76 85V98H24V85Z" fill="#581c87"/>
+                    <path d="M43 64L50 75L57 64" stroke="#f8fafc" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="50" cy="78" r="2.5" fill="#fbbf24"/>
+                    <defs>
+                        <linearGradient id="femaleGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#a855f7" stop-opacity="0.3"/>
+                            <stop offset="1" stop-color="#312e81" stop-opacity="0.8"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            `;
+        }
+
+        let currentCategory = 'all';
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        // 2. WEB AUDIO SYNTHESIZER FOR SOUND EFFECTS
+        function playCardFlipSound() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880.00, audioCtx.currentTime + 0.12);
+                
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch(e) {}
+        }
+
+        function playCheerSound() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * 0.06));
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime + (idx * 0.06));
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + (idx * 0.06));
+                    osc.stop(audioCtx.currentTime + 0.45);
+                });
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-sm";
+                text.innerText = "Sound: On";
+                playCardFlipSound();
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-sm";
+                text.innerText = "Sound: Off";
+            }
+        }
+
+        function renderCards(teachersList) {
+            const grid = document.getElementById('teachersGrid');
+            const noResults = document.getElementById('noResults');
+
+            if (teachersList.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            grid.innerHTML = teachersList.map(teacher => `
+                <div class="card-perspective h-[340px] w-full" id="card-container-${teacher.id}">
+                    <div class="card-inner cursor-pointer" id="card-inner-${teacher.id}">
+                        
+                        <!-- FRONT OF CARD -->
+                        <div class="card-front glass-card-front p-6 flex flex-col justify-between items-center text-center select-none" onclick="toggleCardFlip(${teacher.id})">
+                            <!-- Top Badge Header -->
+                            <div class="w-full flex justify-between items-center border-b border-slate-800/80 pb-3">
+                                <span class="bg-gold-500/15 border border-gold-500/40 text-gold-400 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                    SHS Teacher
+                                </span>
+                                <i class="fa-solid fa-graduation-cap text-slate-500 text-sm"></i>
+                            </div>
+
+                            <!-- Teacher Vector Character Avatar Badge -->
+                            <div class="my-auto py-2 flex flex-col items-center">
+                                <div class="relative mb-3">
+                                    <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500/30 via-purpleAcc-500/30 to-slate-800 border-2 border-gold-500/60 flex items-center justify-center shadow-xl shadow-gold-500/10 overflow-hidden">
+                                        ${teacher.category === 'sir' ? getMaleAvatarSvg() : getFemaleAvatarSvg()}
+                                    </div>
+                                    <div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-slate-900 border border-gold-500/50 flex items-center justify-center text-gold-400 text-xs shadow-md">
+                                        <i class="fa-solid ${teacher.icon || 'fa-star'}"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-xl font-serif font-bold text-white tracking-wide">
+                                    ${teacher.name}
+                                </h3>
+                            </div>
+
+                            <!-- Bottom Prompt to Flip -->
+                            <div class="w-full pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gold-400 flex items-center gap-1.5">
+                                    <span>Click to reveal message</span>
+                                    <i class="fa-solid fa-sparkles text-xs"></i>
+                                </span>
+                                <i class="fa-solid fa-circle-arrow-right text-purpleAcc-400 text-sm"></i>
+                            </div>
+                        </div>
+
+                        <!-- BACK OF CARD -->
+                        <div class="card-back glass-card-back p-6 flex flex-col justify-between text-left select-none" onclick="toggleCardFlip(${teacher.id})">
+                            
+                            <!-- Back Card Header -->
+                            <div class="w-full flex justify-between items-center border-b border-gold-500/30 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-star text-gold-400 text-xs"></i>
+                                    <span class="text-gold-300 font-serif font-bold text-base tracking-wide">
+                                        ${teacher.name}
+                                    </span>
+                                </div>
+                                <span class="text-purpleAcc-400 text-xs font-semibold bg-purpleAcc-500/10 border border-purpleAcc-500/30 px-2 py-0.5 rounded-full">
+                                    Greeting
+                                </span>
+                            </div>
+
+                            <!-- Dedicated Message Body -->
+                            <div class="my-auto py-2 overflow-y-auto">
+                                <p class="text-white text-xs sm:text-sm font-medium leading-relaxed italic bg-slate-900/60 p-3.5 rounded-xl border border-slate-700/60 shadow-inner">
+                                    "${teacher.message}"
+                                </p>
+                            </div>
+
+                            <!-- Back Card Actions (Flip Back) -->
+                            <div class="w-full pt-3 border-t border-gold-500/30 flex items-center justify-end text-xs">
+                                <span class="text-slate-300 font-semibold flex items-center gap-1.5 hover:text-gold-400 transition">
+                                    <i class="fa-solid fa-rotate-left text-gold-400"></i>
+                                    <span>Flip back</span>
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCardFlip(id) {
+            const cardInner = document.getElementById(`card-inner-${id}`);
+            if (cardInner) {
+                cardInner.classList.toggle('is-flipped');
+                playCardFlipSound();
+            }
+        }
+
+        function flipAllCards() {
+            teachersData.forEach(t => {
+                const cardInner = document.getElementById(`card-inner-${t.id}`);
+                if (cardInner && !cardInner.classList.contains('is-flipped')) {
+                    cardInner.classList.add('is-flipped');
+                }
+            });
+            playCheerSound();
+        }
+
+        function resetAllCards() {
+            teachersData.forEach(t => {
+                const cardInner = document.getElementById(`card-inner-${t.id}`);
+                if (cardInner && cardInner.classList.contains('is-flipped')) {
+                    cardInner.classList.remove('is-flipped');
+                }
+            });
+            playCardFlipSound();
+        }
+
+        function setCategoryFilter(category) {
+            currentCategory = category;
+            
+            ['all', 'sir', 'maam'].forEach(cat => {
+                const btn = document.getElementById(`filter-${cat}`);
+                if (cat === category) {
+                    btn.className = "filter-btn bg-gold-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition shadow-md";
+                } else {
+                    btn.className = "filter-btn bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3.5 py-2 rounded-xl text-xs sm:text-sm border border-slate-700 transition";
+                }
+            });
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            const filtered = teachersData.filter(teacher => {
+                const matchesSearch = teacher.name.toLowerCase().includes(query);
+                const matchesCategory = (currentCategory === 'all') || (teacher.category === currentCategory);
+                return matchesSearch && matchesCategory;
+            });
+
+            renderCards(filtered);
+        }
+
+        function triggerConfetti() {
+            playCheerSound();
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 90,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#fbbf24', '#f59e0b', '#c084fc', '#a855f7', '#ffffff']
+                });
+            }
+        }
+
+        function initStarCanvas() {
+            const canvas = document.getElementById('starCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const stars = Array.from({ length: 70 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.012 + 0.004,
+                color: Math.random() > 0.4 ? '#fbbf24' : '#c084fc'
+            }));
+
+            function animateStars() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                stars.forEach(star => {
+                    star.alpha += star.speed;
+                    if (star.alpha > 1 || star.alpha < 0) {
+                        star.speed = -star.speed;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, Math.min(1, star.alpha));
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = star.color;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = star.color;
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(animateStars);
+            }
+            animateStars();
+        }
+
+        // DOM LOAD INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCards(teachersData);
+            initStarCanvas();
+        });
+    </script>
+</body>
+</html>
